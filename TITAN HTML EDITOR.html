@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✧ Titan HTML: Pleroma Edition</title>
+    <style>
+        :root { 
+            --pleroma-white: #ffffff;
+            --pleroma-gold: #af944d;
+            --pleroma-obsidian: #111111;
+            --pleroma-silver: #f5f5f7;
+            --pleroma-glass: rgba(255, 255, 255, 0.98);
+        }
+        
+        body { 
+            font-family: 'optima', 'Segoe UI', serif; 
+            background: var(--pleroma-white); 
+            color: var(--pleroma-obsidian); 
+            display: flex; align-items: center; justify-content: center; 
+            height: 100vh; margin: 0; overflow: hidden;
+        }
+
+        body::before {
+            content: ""; position: absolute; inset: 0;
+            background: linear-gradient(120deg, transparent 30%, rgba(175, 148, 77, 0.05) 50%, transparent 70%);
+            background-size: 200% 100%;
+            animation: shimmer 8s infinite linear; z-index: -1;
+        }
+        @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+        .container { 
+            background: var(--pleroma-white);
+            padding: 60px; border-radius: 2px; 
+            border: 1px solid #e0e0e0;
+            text-align: center; width: 500px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.05);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative; z-index: 10;
+        }
+
+        h1 { 
+            margin: 0; font-size: 1.8em; font-weight: 300; letter-spacing: 5px;
+            text-transform: uppercase; color: var(--pleroma-obsidian);
+            border-bottom: 1px solid var(--pleroma-silver);
+            padding-bottom: 20px;
+        }
+
+        .identity-label { 
+            display: block; font-size: 10px; text-transform: uppercase; 
+            letter-spacing: 3px; color: var(--pleroma-gold); margin-bottom: 15px; 
+            margin-top: 30px; text-align: left;
+        }
+
+        input[type="text"] {
+            width: 100%; background: var(--pleroma-silver); border: none;
+            padding: 15px; border-radius: 0; color: var(--pleroma-obsidian); 
+            outline: none; transition: 0.3s; font-size: 13px; letter-spacing: 1px;
+            box-sizing: border-box;
+        }
+
+        #drop-zone {
+            border: 1px solid #ddd;
+            margin: 40px 0; cursor: pointer; transition: all 0.5s ease;
+            padding: 60px 20px;
+        }
+        #drop-zone:hover { border-color: var(--pleroma-gold); background: var(--pleroma-silver); }
+
+        #drop-text { font-size: 12px; letter-spacing: 4px; text-transform: uppercase; }
+
+        .stats-area { 
+            margin-top: 40px; border-top: 1px solid var(--pleroma-silver); 
+            padding-top: 30px; display: none;
+        }
+
+        .stat-line { 
+            display: flex; justify-content: space-between; 
+            font-size: 11px; text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 10px; color: #888;
+        }
+        .stat-val { color: var(--pleroma-obsidian); font-weight: bold; }
+
+        #savings { font-size: 3em; font-weight: 200; color: var(--pleroma-gold); display: block; margin: 20px 0; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+
+        .action-btn {
+            background: var(--pleroma-obsidian); color: white; font-size: 10px; 
+            letter-spacing: 2px; text-decoration: none; padding: 15px 25px; 
+            text-transform: uppercase; transition: 0.4s; border: none; cursor: pointer;
+        }
+        .action-btn:hover { background: var(--pleroma-gold); }
+        .btn-secondary { background: var(--pleroma-silver); color: var(--pleroma-obsidian); }
+
+        /* The Refining Chamber (Hidden Editor) */
+        #refining-chamber {
+            position: fixed; inset: 0; background: var(--pleroma-glass);
+            z-index: 100; display: none; flex-direction: column; padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+        #editor-header { 
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; border-bottom: 1px solid var(--pleroma-gold); padding-bottom: 10px;
+        }
+        #source-editor {
+            flex: 1; border: 1px solid #ddd; padding: 20px; font-family: 'JetBrains Mono', monospace;
+            font-size: 13px; outline: none; resize: none; color: #444; line-height: 1.6;
+        }
+
+        /* Preview Overlay */
+        #preview-portal {
+            position: fixed; inset: 5%; background: white; z-index: 150;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.2); display: none; border: 1px solid #eee;
+        }
+        #close-portal { position: absolute; top: -40px; right: 0; color: white; cursor: pointer; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Titan : Pleroma</h1>
+    
+    <label class="identity-label">Transmutation Title</label>
+    <input type="text" id="customTitle" placeholder="The New Vessel Name...">
+
+    <div id="drop-zone">
+        <span id="drop-text">Manifest File</span>
+        <input type="file" id="fileInput" accept=".html" style="display:none">
+    </div>
+
+    <div id="stats-area" class="stats-area">
+        <div class="stat-line">Purity Ratio <span class="stat-val" id="savings">0%</span></div>
+        <div class="stat-line">Original Mass <span class="stat-val" id="oldSize">0</span></div>
+        <div class="stat-line">Pleroma Mass <span class="stat-val" id="newSize">0</span></div>
+        <div class="btn-group">
+            <button class="action-btn btn-secondary" onclick="glimpseReality()">Glimpse Reality</button>
+            <a id="downloadBtn" class="action-btn">Extract Essence</a>
+        </div>
+        <div style="margin-top: 15px; font-size: 9px; color: #ccc; letter-spacing: 1px;">PRESS CTRL + E TO REFINE SOURCE</div>
+    </div>
+</div>
+
+<div id="refining-chamber">
+    <div id="editor-header">
+        <span style="font-size: 12px; letter-spacing: 3px; text-transform: uppercase;">Source Refinement</span>
+        <button class="action-btn" onclick="resealVessel()">Reseal & Run</button>
+    </div>
+    <textarea id="source-editor" spellcheck="false"></textarea>
+</div>
+
+<div id="preview-portal">
+    <span id="close-portal" onclick="this.parentElement.style.display='none'">[ Close Reality ]</span>
+    <iframe id="preview-frame" style="width:100%; height:100%; border:none;"></iframe>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('fileInput');
+    const sourceEditor = document.getElementById('source-editor');
+    const refiningChamber = document.getElementById('refining-chamber');
+    let currentRawSource = "";
+    let originalFileSize = 0;
+
+    dropZone.onclick = () => fileInput.click();
+    dropZone.ondragover = (e) => { e.preventDefault(); };
+    dropZone.ondrop = (e) => { e.preventDefault(); processFile(e.dataTransfer.files[0]); };
+    fileInput.onchange = (e) => processFile(e.target.files[0]);
+
+    // CTRL + E to toggle the Refinement Chamber
+    window.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'e') {
+            e.preventDefault();
+            if (currentRawSource) {
+                refiningChamber.style.display = refiningChamber.style.display === 'flex' ? 'none' : 'flex';
+                sourceEditor.value = currentRawSource;
+            }
+        }
+    });
+
+    async function processFile(file) {
+        if (!file || !file.name.endsWith('.html')) return;
+        originalFileSize = file.size;
+        currentRawSource = await file.text();
+        transmute(currentRawSource);
+    }
+
+    async function resealVessel() {
+        currentRawSource = sourceEditor.value;
+        await transmute(currentRawSource);
+        refiningChamber.style.display = 'none';
+        glimpseReality();
+    }
+
+    function glimpseReality() {
+        const portal = document.getElementById('preview-portal');
+        const frame = document.getElementById('preview-frame');
+        portal.style.display = 'block';
+        frame.srcdoc = currentRawSource;
+    }
+
+    async function transmute(text) {
+        const userTitle = document.getElementById('customTitle').value || "Pleroma_Vessel";
+
+        // CLEANSE
+        const cleanedText = text
+            .replace(/<!--[\s\S]*?-->/g, '') 
+            .replace(/\s+/g, ' ')           
+            .replace(/>\s+</g, '><')         
+            .trim();
+
+        // COMPRESS
+        const stream = new Blob([cleanedText]).stream().pipeThrough(new CompressionStream('gzip'));
+        const compressedBuffer = await new Response(stream).arrayBuffer();
+        const base64Data = btoa(String.fromCharCode(...new Uint8Array(compressedBuffer)));
+
+        const outputHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${userTitle}</title></head><body><script>
+(async()=>{
+const b="${base64Data}";
+const bin=Uint8Array.from(atob(b),c=>c.charCodeAt(0));
+const ds=new DecompressionStream("gzip");
+const writer=ds.writable.getWriter();
+writer.write(bin);writer.close();
+const res=await new Response(ds.readable).text();
+document.open();document.write(res);document.close();
+})()
+<\/script></body></html>`;
+
+        const newBlob = new Blob([outputHTML], { type: 'text/html' });
+        
+        // UI Updates
+        document.getElementById('oldSize').innerText = (originalFileSize / 1024).toFixed(2) + ' KB';
+        document.getElementById('newSize').innerText = (newBlob.size / 1024).toFixed(2) + ' KB';
+        document.getElementById('savings').innerText = ((1 - (newBlob.size / originalFileSize)) * 100).toFixed(1) + '%';
+        
+        const btn = document.getElementById('downloadBtn');
+        btn.href = URL.createObjectURL(newBlob);
+        btn.download = `pleroma_vessel.html`;
+        
+        document.getElementById('stats-area').style.display = 'block';
+        document.getElementById('drop-text').innerText = "Vessel Refined";
+    }
+</script>
+
+</body>
+</html>
